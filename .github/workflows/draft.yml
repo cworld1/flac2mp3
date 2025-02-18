@@ -178,7 +178,7 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    needs: [build-unix, build-windows, build-musl, build-snap]
+    needs: [build-unix, build-windows]
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -198,7 +198,7 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    needs: [build-unix, build-windows, build-musl, build-snap]
+    needs: [build-unix, build-windows]
     steps:
       - run: |
           echo 'NIGHTLY_BODY<<EOF' >> $GITHUB_ENV
