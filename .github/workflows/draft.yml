@@ -83,7 +83,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: sccache
-      flac2mp3_GEN_COMPLETIONS: true
       CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER: lld-link.exe
       CARGO_TARGET_AARCH64_PC_WINDOWS_MSVC_LINKER: lld-link.exe
     steps:
@@ -104,7 +103,6 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path ${env:TARGET_NAME}
           Copy-Item -Path "target\${{ matrix.target }}\release-windows\flac2mp3.exe" -Destination ${env:TARGET_NAME}
-          Copy-Item -Path "flac2mp3-boot\completions" -Destination ${env:TARGET_NAME} -Recurse
           Copy-Item -Path "README.md", "LICENSE" -Destination ${env:TARGET_NAME}
           Compress-Archive -Path ${env:TARGET_NAME} -DestinationPath "${env:TARGET_NAME}.zip"
 
@@ -114,66 +112,66 @@ jobs:
           name: flac2mp3-${{ matrix.target }}.zip
           path: flac2mp3-${{ matrix.target }}.zip
 
-  build-musl:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - target: x86_64-unknown-linux-musl
-            image: rust-musl-cross:x86_64-musl
-          - target: aarch64-unknown-linux-musl
-            image: rust-musl-cross:aarch64-musl
-    container:
-      image: docker://ghcr.io/rust-cross/${{ matrix.image }}
-    steps:
-      - uses: actions/checkout@v4
+  # build-musl:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - target: x86_64-unknown-linux-musl
+  #           image: rust-musl-cross:x86_64-musl
+  #         - target: aarch64-unknown-linux-musl
+  #           image: rust-musl-cross:aarch64-musl
+  #   container:
+  #     image: docker://ghcr.io/rust-cross/${{ matrix.image }}
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Add musl target
-        run: rustup target add ${{ matrix.target }}
+  #     - name: Add musl target
+  #       run: rustup target add ${{ matrix.target }}
 
-      - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.6
+  #     - name: Setup sccache
+  #       uses: mozilla-actions/sccache-action@v0.0.6
 
-      - name: Build
-        run: ./scripts/build.sh ${{ matrix.target }}
+  #     - name: Build
+  #       run: ./scripts/build.sh ${{ matrix.target }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: flac2mp3-${{ matrix.target }}.zip
-          path: flac2mp3-${{ matrix.target }}.zip
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: flac2mp3-${{ matrix.target }}.zip
+  #         path: flac2mp3-${{ matrix.target }}.zip
 
-  build-snap:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            arch: amd64
-          - os: ubuntu-24.04-arm
-            arch: arm64
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # build-snap:
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - os: ubuntu-latest
+  #           arch: amd64
+  #         - os: ubuntu-24.04-arm
+  #           arch: arm64
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Setup LXD
-        uses: canonical/setup-lxd@v0.1.2
+  #     - name: Setup LXD
+  #       uses: canonical/setup-lxd@v0.1.2
 
-      - name: Setup snapcraft
-        run: sudo snap install --classic snapcraft
+  #     - name: Setup snapcraft
+  #       run: sudo snap install --classic snapcraft
 
-      - name: Build snap
-        run: snapcraft --verbose
+  #     - name: Build snap
+  #       run: snapcraft --verbose
 
-      - name: Rename snap
-        run: mv flac2mp3_*.snap flac2mp3-${{ matrix.arch }}.snap
+  #     - name: Rename snap
+  #       run: mv flac2mp3_*.snap flac2mp3-${{ matrix.arch }}.snap
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: flac2mp3-${{ matrix.arch }}.snap
-          path: flac2mp3-${{ matrix.arch }}.snap
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: flac2mp3-${{ matrix.arch }}.snap
+  #         path: flac2mp3-${{ matrix.arch }}.snap
 
   draft:
     if: startsWith(github.ref, 'refs/tags/')
