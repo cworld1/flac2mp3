@@ -32,7 +32,7 @@ fn main() {
 }
 
 fn decode_flac_to_pcm(path: &str) -> (Vec<i16>, Vec<i16>, u32) {
-    let file = Box::new(File::open(Path::new(path)).unwrap());
+    let file = Box::new(File::open(Path::new(path)).expect("Failed to open file"));
     let mss = MediaSourceStream::new(file, Default::default());
 
     let format_opts: FormatOptions = Default::default();
@@ -40,13 +40,16 @@ fn decode_flac_to_pcm(path: &str) -> (Vec<i16>, Vec<i16>, u32) {
 
     let probed = symphonia::default::get_probe()
         .format(&hint, mss, &format_opts, &Default::default())
-        .unwrap();
+        .expect("Failed to probe format");
 
     let mut format = probed.format;
-    let track = format.default_track().unwrap().clone();
+    let track = format
+        .default_track()
+        .expect("No default track found")
+        .clone();
     let mut decoder = symphonia::default::get_codecs()
         .make(&track.codec_params, &DecoderOptions::default())
-        .unwrap();
+        .expect("Failed to create decoder");
 
     let track_id = track.id;
 
