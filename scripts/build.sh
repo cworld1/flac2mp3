@@ -9,7 +9,6 @@ cargo build --release --locked --target "$1"
 
 # Create the artifact
 mkdir -p "$ARTIFACT_NAME/completions"
-cp "target/$1/release/ya" "$ARTIFACT_NAME"
 cp "target/$1/release/flac2mp3" "$ARTIFACT_NAME"
 cp flac2mp3-cli/completions/* "$ARTIFACT_NAME/completions"
 cp flac2mp3-boot/completions/* "$ARTIFACT_NAME/completions"

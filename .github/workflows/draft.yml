@@ -103,7 +103,6 @@ jobs:
           TARGET_NAME: flac2mp3-${{ matrix.target }}
         run: |
           New-Item -ItemType Directory -Path ${env:TARGET_NAME}
-          Copy-Item -Path "target\${{ matrix.target }}\release-windows\ya.exe" -Destination ${env:TARGET_NAME}
           Copy-Item -Path "target\${{ matrix.target }}\release-windows\flac2mp3.exe" -Destination ${env:TARGET_NAME}
           Copy-Item -Path "flac2mp3-boot\completions" -Destination ${env:TARGET_NAME} -Recurse
           Copy-Item -Path "README.md", "LICENSE" -Destination ${env:TARGET_NAME}
