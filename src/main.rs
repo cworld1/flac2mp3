@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use std::env;
 use std::fs::File;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::DecoderOptions;
 use symphonia::core::errors::Error;
@@ -22,13 +22,21 @@ fn main() {
     println!("Encoding PCM to MP3...");
     let mp3_data = encode_pcm_to_mp3(&pcm_left, &pcm_right, sample_rate, 2);
 
+    let output_path = change_extension(path, "mp3");
+
     println!("Writing MP3 data to file...");
-    let mut output_file = File::create("output.mp3").expect("Failed to create output file");
+    let mut output_file = File::create(&output_path).expect("Failed to create output file");
     output_file
         .write_all(&mp3_data)
         .expect("Failed to write MP3 data to file");
 
-    println!("MP3 file created: output.mp3");
+    println!("MP3 file created: {}", output_path);
+}
+
+fn change_extension(path: &str, new_extension: &str) -> String {
+    let mut path_buf = PathBuf::from(path);
+    path_buf.set_extension(new_extension);
+    path_buf.to_string_lossy().into_owned()
 }
 
 fn decode_flac_to_pcm(path: &str) -> (Vec<i16>, Vec<i16>, u32) {
