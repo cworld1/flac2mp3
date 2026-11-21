@@ -14,23 +14,27 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::probe::Hint;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let path = args.get(1).expect("file path not provided");
+    let args: Vec<String> = env::args().skip(1).collect();
+    if args.is_empty() {
+        panic!("file path not provided");
+    }
 
-    let (pcm_left, pcm_right, sample_rate) = decode_flac_to_pcm(path);
+    for path in args {
+        let (pcm_left, pcm_right, sample_rate) = decode_flac_to_pcm(&path);
 
-    println!("Encoding PCM to MP3...");
-    let mp3_data = encode_pcm_to_mp3(&pcm_left, &pcm_right, sample_rate, 2);
+        println!("Encoding PCM to MP3...");
+        let mp3_data = encode_pcm_to_mp3(&pcm_left, &pcm_right, sample_rate, 2);
 
-    let output_path = change_extension(path, "mp3");
+        let output_path = change_extension(&path, "mp3");
 
-    println!("Writing MP3 data to file...");
-    let mut output_file = File::create(&output_path).expect("Failed to create output file");
-    output_file
-        .write_all(&mp3_data)
-        .expect("Failed to write MP3 data to file");
+        println!("Writing MP3 data to file...");
+        let mut output_file = File::create(&output_path).expect("Failed to create output file");
+        output_file
+            .write_all(&mp3_data)
+            .expect("Failed to write MP3 data to file");
 
-    println!("MP3 file created: {}", output_path);
+        println!("MP3 file created: {}", output_path);
+    }
 }
 
 fn change_extension(path: &str, new_extension: &str) -> String {
